@@ -94,11 +94,7 @@ export default function BibleScreen({ navigation }: RootStackScreenProps<'Bible'
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>圣经</Text>
-      </View>
-
+    <SafeAreaView style={styles.container} edges={['bottom']}>
       {/* 旧约/新约切换 */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
@@ -144,21 +140,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    padding: spacing.lg,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTitle: {
-    fontSize: fontSize.xxl,
-    fontWeight: fontWeight.bold,
-    color: colors.textPrimary,
-  },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: spacing.md,
   },
   tab: {

@@ -78,7 +78,7 @@ export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devot
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -87,7 +87,12 @@ export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devot
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* 顶部标题栏 */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>早灵修</Text>
+      </View>
+
       <ScrollView
         style={styles.scrollView}
         refreshControl={
@@ -194,6 +199,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  header: {
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerTitle: {
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
   },
   scrollView: {
     flex: 1,

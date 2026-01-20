@@ -138,7 +138,7 @@ export default function SermonsScreen({ navigation }: RootStackScreenProps<'Serm
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -147,10 +147,7 @@ export default function SermonsScreen({ navigation }: RootStackScreenProps<'Serm
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>讲道</Text>
-      </View>
+    <SafeAreaView style={styles.container} edges={['bottom']}>
       <FlatList
         data={sermons}
         renderItem={renderSermon}
@@ -185,17 +182,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  header: {
-    padding: spacing.lg,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTitle: {
-    fontSize: fontSize.xxl,
-    fontWeight: fontWeight.bold,
-    color: colors.textPrimary,
   },
   listContent: {
     padding: spacing.lg,
