@@ -17,8 +17,10 @@ import { getBanners } from '../services/api';
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
 import type { Banner } from '../types';
 
+const BANNER_MARGIN = 16;
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const BANNER_HEIGHT = 180;
+const BANNER_WIDTH = SCREEN_WIDTH - BANNER_MARGIN * 2;
+const BANNER_HEIGHT = 160;
 
 export default function BannerCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -50,7 +52,7 @@ export default function BannerCarousel() {
     if (banners.length <= 1) return;
     const nextIndex = currentIndex < banners.length - 1 ? currentIndex + 1 : 0;
     setCurrentIndex(nextIndex);
-    scrollViewRef.current?.scrollTo({ x: nextIndex * SCREEN_WIDTH, animated: true });
+    scrollViewRef.current?.scrollTo({ x: nextIndex * BANNER_WIDTH, animated: true });
   }, [banners.length, currentIndex]);
 
   // 自动播放
@@ -74,7 +76,7 @@ export default function BannerCarousel() {
   // 处理滚动结束
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / SCREEN_WIDTH);
+    const index = Math.round(offsetX / BANNER_WIDTH);
     if (index !== currentIndex && index >= 0 && index < banners.length) {
       setCurrentIndex(index);
     }
@@ -108,7 +110,7 @@ export default function BannerCarousel() {
   // 点击指示点
   const handleDotPress = (index: number) => {
     setCurrentIndex(index);
-    scrollViewRef.current?.scrollTo({ x: index * SCREEN_WIDTH, animated: true });
+    scrollViewRef.current?.scrollTo({ x: index * BANNER_WIDTH, animated: true });
   };
 
   // 加载中或无数据时显示占位图
@@ -127,7 +129,9 @@ export default function BannerCarousel() {
       <ScrollView
         ref={scrollViewRef}
         horizontal
-        pagingEnabled
+        pagingEnabled={false}
+        snapToInterval={BANNER_WIDTH}
+        decelerationRate="fast"
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScrollEnd}
         scrollEventThrottle={16}
@@ -197,6 +201,10 @@ export default function BannerCarousel() {
 const styles = StyleSheet.create({
   container: {
     height: BANNER_HEIGHT,
+    marginHorizontal: BANNER_MARGIN,
+    marginTop: spacing.lg,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
     backgroundColor: colors.section,
   },
   placeholder: {
@@ -204,6 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: borderRadius.lg,
   },
   placeholderText: {
     fontSize: 32,
@@ -212,7 +221,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   slide: {
-    width: SCREEN_WIDTH,
+    width: BANNER_WIDTH,
     height: BANNER_HEIGHT,
   },
   image: {
