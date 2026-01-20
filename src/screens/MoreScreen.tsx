@@ -5,12 +5,13 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Linking from 'expo-linking';
 
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
-import { APP_NAME, APP_VERSION } from '../constants/config';
 import type { MainTabScreenProps } from '../navigation/types';
 
 type MenuItemProps = {
@@ -35,56 +36,83 @@ function MenuItem({ icon, title, subtitle, onPress }: MenuItemProps) {
   );
 }
 
-export default function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
+export default function MoreScreen({ navigation }: MainTabScreenProps<'More'>) {
+  const showComingSoon = (feature: string) => {
+    Alert.alert('提示', `${feature}功能开发中...`);
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>我的</Text>
+        <Text style={styles.headerTitle}>更多</Text>
       </View>
       <ScrollView style={styles.scrollView}>
-        {/* 信息区 */}
+        {/* 功能区 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>关于</Text>
           <View style={styles.menuCard}>
             <MenuItem
-              icon="information-circle-outline"
-              title="关于我们"
-              subtitle="了解 BGC7 教会"
-              onPress={() => {}}
+              icon="book-outline"
+              title="圣经阅读"
+              subtitle="在线阅读圣经"
+              onPress={() => navigation.navigate('BibleReader', { bookId: 1, chapter: 1 })}
             />
             <MenuItem
-              icon="call-outline"
-              title="联系方式"
-              subtitle="获取教会联系信息"
-              onPress={() => {}}
+              icon="time-outline"
+              title="敬拜时间"
+              subtitle="查看礼拜时间安排"
+              onPress={() => showComingSoon('敬拜时间')}
+            />
+            <MenuItem
+              icon="notifications-outline"
+              title="公告"
+              subtitle="教会通知公告"
+              onPress={() => showComingSoon('公告')}
+            />
+            <MenuItem
+              icon="images-outline"
+              title="相册"
+              subtitle="查看活动照片"
+              onPress={() => navigation.navigate('Gallery')}
             />
           </View>
         </View>
 
-        {/* 设置区 */}
+        {/* 工具区 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>设置</Text>
+          <Text style={styles.sectionTitle}>工具</Text>
           <View style={styles.menuCard}>
             <MenuItem
-              icon="settings-outline"
-              title="播放设置"
-              subtitle="音频播放相关设置"
-              onPress={() => {}}
+              icon="apps-outline"
+              title="常用软件"
+              subtitle="推荐的基督徒应用"
+              onPress={() => showComingSoon('常用软件')}
             />
             <MenuItem
-              icon="trash-outline"
-              title="清除缓存"
-              subtitle="清理本地缓存数据"
-              onPress={() => {}}
+              icon="chatbubble-outline"
+              title="问题反馈"
+              subtitle="提交建议或报告问题"
+              onPress={() => showComingSoon('问题反馈')}
+            />
+            <MenuItem
+              icon="volume-high-outline"
+              title="音频测试"
+              subtitle="测试音频播放功能"
+              onPress={() => showComingSoon('音频测试')}
             />
           </View>
         </View>
 
-        {/* 版本信息 */}
-        <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>
-            {APP_NAME} v{APP_VERSION}
-          </Text>
+        {/* 外部链接 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>链接</Text>
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="globe-outline"
+              title="访问网站"
+              subtitle="在浏览器中打开 BGC7 网站"
+              onPress={() => Linking.openURL('https://bgc7.cn')}
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -154,13 +182,5 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.textSecondary,
     marginTop: 2,
-  },
-  versionContainer: {
-    padding: spacing.xxl,
-    alignItems: 'center',
-  },
-  versionText: {
-    fontSize: fontSize.sm,
-    color: colors.textTertiary,
   },
 });

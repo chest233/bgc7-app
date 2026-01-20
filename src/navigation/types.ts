@@ -5,17 +5,18 @@ import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigat
 // 主页 Tab 导航参数
 export type MainTabParamList = {
   Home: undefined;
-  Sermons: undefined;
-  Bible: undefined;
+  Devotion: undefined;
+  More: undefined;
   Profile: undefined;
 };
 
 // 根导航参数
 export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList>;
+  Sermons: undefined;
   SermonDetail: { id: string };
-  Devotion: undefined;
   DevotionDetail: { id: number };
+  Bible: undefined;
   BibleReader: { bookId: number; chapter: number };
   Gallery: undefined;
   GalleryDetail: { id: number };

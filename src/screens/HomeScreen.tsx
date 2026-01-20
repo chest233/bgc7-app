@@ -11,28 +11,24 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { getSermons, getTodayDevotion } from '../services/api';
+import { getSermons } from '../services/api';
+import { BannerCarousel } from '../components';
 import { colors, spacing, borderRadius, fontSize, fontWeight, shadows } from '../constants/theme';
 import type { MainTabScreenProps } from '../navigation/types';
-import type { Sermon, Devotion } from '../types';
+import type { Sermon } from '../types';
 
 type ServiceTime = 'morning' | 'afternoon';
 
 export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   const [sermons, setSermons] = useState<Sermon[]>([]);
-  const [todayDevotion, setTodayDevotion] = useState<Devotion | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [serviceTime, setServiceTime] = useState<ServiceTime>('morning');
 
   const fetchData = async () => {
     try {
-      const [sermonsData, devotionData] = await Promise.all([
-        getSermons({ limit: 20 }).catch(() => ({ sermons: [] })),
-        getTodayDevotion().catch(() => null),
-      ]);
+      const sermonsData = await getSermons({ limit: 20 }).catch(() => ({ sermons: [] }));
       setSermons(sermonsData?.sermons || []);
-      setTodayDevotion(devotionData || null);
     } catch (error) {
       console.error('Failed to fetch home data:', error);
     } finally {
@@ -69,23 +65,6 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
     };
   };
 
-  // 获取星期几
-  const getWeekday = (dateStr: string) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return '';
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    return weekdays[date.getDay()];
-  };
-
-  // 格式化日期
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return '';
-    return `${date.getMonth() + 1}月${date.getDate()}日`;
-  };
-
   // 获取标签
   const getTags = (sermon: Sermon) => {
     const tags: string[] = [];
@@ -97,7 +76,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -107,11 +86,6 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* 顶部标题栏 */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>BGC7</Text>
-      </View>
-
       <ScrollView
         style={styles.scrollView}
         refreshControl={
@@ -122,35 +96,8 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
           />
         }
       >
-        {/* 今日灵修卡片 */}
-        {todayDevotion && (
-          <TouchableOpacity
-            style={styles.devotionCard}
-            onPress={() => navigation.navigate('DevotionDetail', { id: todayDevotion.id })}
-            activeOpacity={0.9}
-          >
-            <Text style={styles.devotionLabel}>今日灵修</Text>
-            <Text style={styles.devotionDate}>
-              {getWeekday(todayDevotion.date)} · {formatDate(todayDevotion.date)}
-            </Text>
-            {todayDevotion.scripture && (
-              <Text style={styles.devotionScripture}>经文: {todayDevotion.scripture}</Text>
-            )}
-          </TouchableOpacity>
-        )}
-
-        {/* 如果没有今日灵修，显示入口卡片 */}
-        {!todayDevotion && (
-          <TouchableOpacity
-            style={styles.devotionCard}
-            onPress={() => navigation.navigate('Devotion')}
-            activeOpacity={0.9}
-          >
-            <Text style={styles.devotionLabel}>每日早灵修</Text>
-            <Text style={styles.devotionDate}>周一至周五 6:20 - 7:00</Text>
-            <Text style={styles.devotionLink}>点击查看 →</Text>
-          </TouchableOpacity>
-        )}
+        {/* Banner 轮播图 */}
+        <BannerCarousel />
 
         {/* Tab 切换 */}
         <View style={styles.tabWrapper}>
@@ -250,56 +197,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // 头部
-  header: {
-    height: 56,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTitle: {
-    fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
-    color: colors.primary,
-  },
   scrollView: {
     flex: 1,
-  },
-  // 今日灵修卡片
-  devotionCard: {
-    margin: spacing.lg,
-    padding: spacing.xl,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.primary,
-    ...shadows.md,
-  },
-  devotionLabel: {
-    fontSize: fontSize.sm,
-    color: 'rgba(255,255,255,0.8)',
-    marginBottom: spacing.xs,
-  },
-  devotionDate: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.semibold,
-    color: colors.textOnPrimary,
-    marginBottom: spacing.sm,
-  },
-  devotionScripture: {
-    fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
-    color: colors.textOnPrimary,
-    lineHeight: 28,
-  },
-  devotionLink: {
-    fontSize: fontSize.sm,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: spacing.sm,
   },
   // Tab 切换
   tabWrapper: {
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
     marginBottom: spacing.lg,
   },
   tabContainer: {

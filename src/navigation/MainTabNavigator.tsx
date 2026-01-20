@@ -3,8 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from '../screens/HomeScreen';
-import SermonsScreen from '../screens/SermonsScreen';
-import BibleScreen from '../screens/BibleScreen';
+import DevotionScreen from '../screens/DevotionScreen';
+import MoreScreen from '../screens/MoreScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 import { colors } from '../constants/theme';
@@ -17,8 +17,8 @@ type IconName = keyof typeof Ionicons.glyphMap;
 const getTabBarIcon = (routeName: string, focused: boolean): IconName => {
   const iconMap: Record<string, { focused: IconName; unfocused: IconName }> = {
     Home: { focused: 'home', unfocused: 'home-outline' },
-    Sermons: { focused: 'mic', unfocused: 'mic-outline' },
-    Bible: { focused: 'book', unfocused: 'book-outline' },
+    Devotion: { focused: 'sunny', unfocused: 'sunny-outline' },
+    More: { focused: 'grid', unfocused: 'grid-outline' },
     Profile: { focused: 'person', unfocused: 'person-outline' },
   };
 
@@ -49,14 +49,14 @@ export default function MainTabNavigator() {
         options={{ tabBarLabel: '首页' }}
       />
       <Tab.Screen
-        name="Sermons"
-        component={SermonsScreen}
-        options={{ tabBarLabel: '讲道' }}
+        name="Devotion"
+        component={DevotionScreen}
+        options={{ tabBarLabel: '早灵修' }}
       />
       <Tab.Screen
-        name="Bible"
-        component={BibleScreen}
-        options={{ tabBarLabel: '圣经' }}
+        name="More"
+        component={MoreScreen}
+        options={{ tabBarLabel: '更多' }}
       />
       <Tab.Screen
         name="Profile"

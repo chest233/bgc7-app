@@ -13,12 +13,12 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { getSermons } from '../services/api';
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
-import type { MainTabScreenProps } from '../navigation/types';
+import type { RootStackScreenProps } from '../navigation/types';
 import type { Sermon } from '../types';
 
 const PAGE_SIZE = 20;
 
-export default function SermonsScreen({ navigation }: MainTabScreenProps<'Sermons'>) {
+export default function SermonsScreen({ navigation }: RootStackScreenProps<'Sermons'>) {
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

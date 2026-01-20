@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
-import type { MainTabScreenProps } from '../navigation/types';
+import type { RootStackScreenProps } from '../navigation/types';
 
 // 圣经书卷数据（静态）
 const OLD_TESTAMENT = [
@@ -84,7 +84,7 @@ const NEW_TESTAMENT = [
   { id: 66, name: '启示录', chapters: 22 },
 ];
 
-export default function BibleScreen({ navigation }: MainTabScreenProps<'Bible'>) {
+export default function BibleScreen({ navigation }: RootStackScreenProps<'Bible'>) {
   const [activeTab, setActiveTab] = useState<'old' | 'new'>('old');
 
   const books = activeTab === 'old' ? OLD_TESTAMENT : NEW_TESTAMENT;

@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getDevotions, getTodayDevotion, getCurrentWeekInfo, getPrayerRequests } from '../services/api';
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
-import type { RootStackScreenProps } from '../navigation/types';
+import type { MainTabScreenProps } from '../navigation/types';
 import type { Devotion, PrayerRequest, WeekInfo } from '../types';
 
 // 格式化日期
@@ -33,7 +33,7 @@ const getWeekdayName = (dateStr: string) => {
   return weekdays[date.getDay()];
 };
 
-export default function DevotionScreen({ navigation }: RootStackScreenProps<'Devotion'>) {
+export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devotion'>) {
   const [todayDevotion, setTodayDevotion] = useState<Devotion | null>(null);
   const [weekDevotions, setWeekDevotions] = useState<Devotion[]>([]);
   const [prayerRequests, setPrayerRequests] = useState<PrayerRequest[]>([]);

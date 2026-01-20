@@ -2,9 +2,10 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import MainTabNavigator from './MainTabNavigator';
+import SermonsScreen from '../screens/SermonsScreen';
 import SermonDetailScreen from '../screens/SermonDetailScreen';
-import DevotionScreen from '../screens/DevotionScreen';
 import DevotionDetailScreen from '../screens/DevotionDetailScreen';
+import BibleScreen from '../screens/BibleScreen';
 import BibleReaderScreen from '../screens/BibleReaderScreen';
 import GalleryScreen from '../screens/GalleryScreen';
 import GalleryDetailScreen from '../screens/GalleryDetailScreen';
@@ -31,19 +32,24 @@ export default function RootNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="Sermons"
+        component={SermonsScreen}
+        options={{ title: '全部讲道' }}
+      />
+      <Stack.Screen
         name="SermonDetail"
         component={SermonDetailScreen}
         options={{ title: '讲道详情' }}
       />
       <Stack.Screen
-        name="Devotion"
-        component={DevotionScreen}
-        options={{ title: '每日灵修' }}
-      />
-      <Stack.Screen
         name="DevotionDetail"
         component={DevotionDetailScreen}
         options={{ title: '灵修详情' }}
+      />
+      <Stack.Screen
+        name="Bible"
+        component={BibleScreen}
+        options={{ title: '圣经书卷' }}
       />
       <Stack.Screen
         name="BibleReader"
