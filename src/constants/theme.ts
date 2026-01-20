@@ -1,3 +1,5 @@
+import { scale, moderateScale } from '../utils/responsive';
+
 // 主题配色 - 与 web 项目保持一致
 export const colors = {
   // 主色调 - 马鞍棕/巧克力棕
@@ -40,33 +42,33 @@ export const colors = {
   textTertiary: '#999999',
 };
 
-// 间距
+// 间距 - 使用 scale 等比缩放
 export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
+  xs: scale(4),
+  sm: scale(8),
+  md: scale(12),
+  lg: scale(16),
+  xl: scale(20),
+  xxl: scale(24),
 };
 
-// 圆角
+// 圆角 - 使用 moderateScale 缓和缩放
 export const borderRadius = {
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
+  sm: moderateScale(4),
+  md: moderateScale(8),
+  lg: moderateScale(12),
+  xl: moderateScale(16),
   full: 9999,
 };
 
-// 字体大小
+// 字体大小 - 使用 moderateScale 缓和缩放，避免大屏字体过大
 export const fontSize = {
-  xs: 11,
-  sm: 13,
-  md: 15,
-  lg: 17,
-  xl: 20,
-  xxl: 24,
+  xs: moderateScale(11),
+  sm: moderateScale(13),
+  md: moderateScale(15),
+  lg: moderateScale(17),
+  xl: moderateScale(20),
+  xxl: moderateScale(24),
 };
 
 // 字体权重
@@ -77,7 +79,7 @@ export const fontWeight = {
   bold: '700' as const,
 };
 
-// 阴影
+// 阴影 - 保持固定值
 export const shadows = {
   sm: {
     shadowColor: '#000',
@@ -93,4 +95,11 @@ export const shadows = {
     shadowRadius: 12,
     elevation: 4,
   },
+};
+
+// 导出原始设计稿尺寸（供特殊情况使用）
+export const rawSizes = {
+  spacing: { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24 },
+  fontSize: { xs: 11, sm: 13, md: 15, lg: 17, xl: 20, xxl: 24 },
+  borderRadius: { sm: 4, md: 8, lg: 12, xl: 16 },
 };

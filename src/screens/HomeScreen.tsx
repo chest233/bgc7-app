@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getSermons } from '../services/api';
 import { BannerCarousel } from '../components';
 import { colors, spacing, borderRadius, fontSize, fontWeight, shadows } from '../constants/theme';
+import { scale, moderateScale } from '../utils/responsive';
 import type { MainTabScreenProps } from '../navigation/types';
 import type { Sermon } from '../types';
 
@@ -274,7 +275,7 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.semibold,
     color: colors.textPrimary,
     marginBottom: spacing.xs,
-    lineHeight: 24,
+    lineHeight: moderateScale(24),
   },
   sermonMeta: {
     fontSize: fontSize.sm,
@@ -302,15 +303,15 @@ const styles = StyleSheet.create({
   },
   // 日期盒子
   dateBox: {
-    width: 52,
-    height: 52,
+    width: scale(52),
+    height: scale(52),
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
   dateDay: {
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: fontWeight.bold,
     color: colors.textOnPrimary,
   },

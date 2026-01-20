@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   Image,
-  Dimensions,
   TouchableOpacity,
   ScrollView,
   NativeSyntheticEvent,
@@ -15,12 +14,12 @@ import * as Linking from 'expo-linking';
 
 import { getBanners } from '../services/api';
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
+import { scale, verticalScale, moderateScale, SCREEN_WIDTH } from '../utils/responsive';
 import type { Banner } from '../types';
 
-const BANNER_MARGIN = 16;
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const BANNER_MARGIN = scale(16);
 const BANNER_WIDTH = SCREEN_WIDTH - BANNER_MARGIN * 2;
-const BANNER_HEIGHT = 160;
+const BANNER_HEIGHT = verticalScale(160);
 
 export default function BannerCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -215,7 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
   },
   placeholderText: {
-    fontSize: 32,
+    fontSize: moderateScale(32),
     fontWeight: fontWeight.bold,
     color: colors.textOnPrimary,
     opacity: 0.8,
@@ -238,7 +237,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: spacing.lg,
-    paddingBottom: spacing.xl + 16, // 留出指示点空间
+    paddingBottom: spacing.xl + scale(16), // 留出指示点空间
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
   title: {
@@ -250,7 +249,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: fontSize.sm,
     color: 'rgba(255,255,255,0.9)',
-    lineHeight: 18,
+    lineHeight: moderateScale(18),
   },
   placeholderSlide: {
     flex: 1,
@@ -281,14 +280,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: scale(8),
+    height: scale(8),
+    borderRadius: scale(4),
     backgroundColor: 'rgba(255,255,255,0.5)',
-    marginHorizontal: 4,
+    marginHorizontal: scale(4),
   },
   dotActive: {
     backgroundColor: '#FFFFFF',
-    width: 16,
+    width: scale(16),
   },
 });

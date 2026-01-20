@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
+import { scale, moderateScale } from '../utils/responsive';
 import { APP_NAME, APP_VERSION } from '../constants/config';
 import type { MainTabScreenProps } from '../navigation/types';
 
@@ -24,13 +25,13 @@ function MenuItem({ icon, title, subtitle, onPress }: MenuItemProps) {
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.menuIcon}>
-        <Ionicons name={icon} size={22} color={colors.primary} />
+        <Ionicons name={icon} size={moderateScale(22)} color={colors.primary} />
       </View>
       <View style={styles.menuContent}>
         <Text style={styles.menuTitle}>{title}</Text>
         {subtitle && <Text style={styles.menuSubtitle}>{subtitle}</Text>}
       </View>
-      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+      <Ionicons name="chevron-forward" size={moderateScale(20)} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 }
@@ -134,9 +135,9 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.divider,
   },
   menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
     backgroundColor: colors.tagBackground,
     justifyContent: 'center',
     alignItems: 'center',

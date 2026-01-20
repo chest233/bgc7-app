@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getDevotions, getTodayDevotion, getCurrentWeekInfo, getPrayerRequests } from '../services/api';
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
+import { moderateScale } from '../utils/responsive';
 import type { MainTabScreenProps } from '../navigation/types';
 import type { Devotion, PrayerRequest, WeekInfo } from '../types';
 
@@ -276,7 +277,7 @@ const styles = StyleSheet.create({
   prayerContent: {
     fontSize: fontSize.md,
     color: colors.textPrimary,
-    lineHeight: 22,
+    lineHeight: moderateScale(22),
   },
   prayerSubmitter: {
     fontSize: fontSize.sm,
