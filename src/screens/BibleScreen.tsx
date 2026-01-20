@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
 import type { MainTabScreenProps } from '../navigation/types';
 
 // 圣经书卷数据（静态）
@@ -101,18 +102,18 @@ export default function BibleScreen({ navigation }: MainTabScreenProps<'Bible'>)
       {/* 旧约/新约切换 */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'old' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'old' && styles.tabActive]}
           onPress={() => setActiveTab('old')}
         >
-          <Text style={[styles.tabText, activeTab === 'old' && styles.activeTabText]}>
+          <Text style={[styles.tabText, activeTab === 'old' && styles.tabTextActive]}>
             旧约 (39卷)
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'new' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'new' && styles.tabActive]}
           onPress={() => setActiveTab('new')}
         >
-          <Text style={[styles.tabText, activeTab === 'new' && styles.activeTabText]}>
+          <Text style={[styles.tabText, activeTab === 'new' && styles.tabTextActive]}>
             新约 (27卷)
           </Text>
         </TouchableOpacity>
@@ -126,6 +127,7 @@ export default function BibleScreen({ navigation }: MainTabScreenProps<'Bible'>)
               key={book.id}
               style={styles.bookItem}
               onPress={() => handleBookPress(book.id)}
+              activeOpacity={0.7}
             >
               <Text style={styles.bookName}>{book.name}</Text>
               <Text style={styles.bookChapters}>{book.chapters}章</Text>
@@ -140,41 +142,42 @@ export default function BibleScreen({ navigation }: MainTabScreenProps<'Bible'>)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   header: {
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
   },
   tab: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
+    marginHorizontal: spacing.xs,
   },
-  activeTab: {
-    backgroundColor: '#2563eb',
+  tabActive: {
+    backgroundColor: colors.primary,
   },
   tabText: {
-    fontSize: 14,
-    color: '#6b7280',
-    fontWeight: '500',
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    fontWeight: fontWeight.medium,
   },
-  activeTabText: {
-    color: '#fff',
+  tabTextActive: {
+    color: colors.textOnPrimary,
   },
   scrollView: {
     flex: 1,
@@ -182,30 +185,25 @@ const styles = StyleSheet.create({
   booksGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 12,
+    padding: spacing.md,
   },
   bookItem: {
     width: '31%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
     margin: '1%',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 1,
-    elevation: 1,
   },
   bookName: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#1f2937',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+    color: colors.textPrimary,
     textAlign: 'center',
   },
   bookChapters: {
-    fontSize: 12,
-    color: '#9ca3af',
-    marginTop: 4,
+    fontSize: fontSize.xs,
+    color: colors.textTertiary,
+    marginTop: spacing.xs,
   },
 });

@@ -3,11 +3,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import MainTabNavigator from './MainTabNavigator';
 import SermonDetailScreen from '../screens/SermonDetailScreen';
+import DevotionScreen from '../screens/DevotionScreen';
 import DevotionDetailScreen from '../screens/DevotionDetailScreen';
 import BibleReaderScreen from '../screens/BibleReaderScreen';
 import GalleryScreen from '../screens/GalleryScreen';
 import GalleryDetailScreen from '../screens/GalleryDetailScreen';
 
+import { colors } from '../constants/theme';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -17,7 +19,10 @@ export default function RootNavigator() {
     <Stack.Navigator
       screenOptions={{
         headerBackTitle: '返回',
-        headerTintColor: '#2563eb',
+        headerTintColor: colors.primary,
+        headerTitleStyle: {
+          color: colors.textPrimary,
+        },
       }}
     >
       <Stack.Screen
@@ -29,6 +34,11 @@ export default function RootNavigator() {
         name="SermonDetail"
         component={SermonDetailScreen}
         options={{ title: '讲道详情' }}
+      />
+      <Stack.Screen
+        name="Devotion"
+        component={DevotionScreen}
+        options={{ title: '每日灵修' }}
       />
       <Stack.Screen
         name="DevotionDetail"

@@ -11,11 +11,29 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getDevotions, getTodayDevotion, getCurrentWeekInfo, getPrayerRequests } from '../services/api';
-import { formatChineseDate, getWeekdayName } from '../utils';
-import type { MainTabScreenProps } from '../navigation/types';
+import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
+import type { RootStackScreenProps } from '../navigation/types';
 import type { Devotion, PrayerRequest, WeekInfo } from '../types';
 
-export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devotion'>) {
+// 格式化日期
+const formatChineseDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${month}月${day}日`;
+};
+
+const getWeekdayName = (dateStr: string) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return weekdays[date.getDay()];
+};
+
+export default function DevotionScreen({ navigation }: RootStackScreenProps<'Devotion'>) {
   const [todayDevotion, setTodayDevotion] = useState<Devotion | null>(null);
   const [weekDevotions, setWeekDevotions] = useState<Devotion[]>([]);
   const [prayerRequests, setPrayerRequests] = useState<PrayerRequest[]>([]);
@@ -37,7 +55,6 @@ export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devot
 
       if (week) {
         const devotions = await getDevotions({ year: week.year, week: week.week }).catch(() => []);
-        // 过滤掉今日灵修
         const todayStr = new Date().toISOString().split('T')[0];
         const devotionList = Array.isArray(devotions) ? devotions : [];
         setWeekDevotions(devotionList.filter((d) => d.date !== todayStr));
@@ -61,42 +78,36 @@ export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devot
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>早灵修</Text>
-        {weekInfo && (
-          <Text style={styles.weekText}>
-            {weekInfo.year}年 第{weekInfo.week}周
-          </Text>
-        )}
-      </View>
+    <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView
         style={styles.scrollView}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
         }
       >
         {/* 今日灵修 */}
         {todayDevotion && (
           <TouchableOpacity
             style={styles.todayCard}
-            onPress={() =>
-              navigation.navigate('DevotionDetail', { id: todayDevotion.id })
-            }
+            onPress={() => navigation.navigate('DevotionDetail', { id: todayDevotion.id })}
+            activeOpacity={0.8}
           >
             <Text style={styles.todayLabel}>今日灵修</Text>
             <Text style={styles.todayDate}>
-              {formatChineseDate(todayDevotion.date)}{' '}
-              {getWeekdayName(todayDevotion.date)}
+              {formatChineseDate(todayDevotion.date)} {getWeekdayName(todayDevotion.date)}
             </Text>
             {todayDevotion.scripture && (
               <Text style={styles.todayScripture}>{todayDevotion.scripture}</Text>
@@ -114,13 +125,17 @@ export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devot
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>本周祷告事项</Text>
             <View style={styles.prayerCard}>
-              {prayerRequests.map((prayer) => (
-                <View key={prayer.id} style={styles.prayerItem}>
+              {prayerRequests.map((prayer, index) => (
+                <View
+                  key={prayer.id}
+                  style={[
+                    styles.prayerItem,
+                    index === prayerRequests.length - 1 && styles.prayerItemLast,
+                  ]}
+                >
                   <Text style={styles.prayerContent}>{prayer.content}</Text>
                   {!prayer.is_anonymous && prayer.submitter_name && (
-                    <Text style={styles.prayerSubmitter}>
-                      — {prayer.submitter_name}
-                    </Text>
+                    <Text style={styles.prayerSubmitter}>— {prayer.submitter_name}</Text>
                   )}
                 </View>
               ))}
@@ -136,19 +151,17 @@ export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devot
               <TouchableOpacity
                 key={devotion.id}
                 style={styles.devotionCard}
-                onPress={() =>
-                  navigation.navigate('DevotionDetail', { id: devotion.id })
-                }
+                onPress={() => navigation.navigate('DevotionDetail', { id: devotion.id })}
+                activeOpacity={0.7}
               >
-                <Text style={styles.devotionDate}>
-                  {formatChineseDate(devotion.date)}{' '}
-                  {getWeekdayName(devotion.date)}
-                </Text>
-                {devotion.scripture && (
-                  <Text style={styles.devotionScripture}>
-                    {devotion.scripture}
+                <View style={styles.devotionContent}>
+                  <Text style={styles.devotionDate}>
+                    {formatChineseDate(devotion.date)} {getWeekdayName(devotion.date)}
                   </Text>
-                )}
+                  {devotion.scripture && (
+                    <Text style={styles.devotionScripture}>{devotion.scripture}</Text>
+                  )}
+                </View>
                 {devotion.audio_status === 'ready' && (
                   <View style={styles.smallAudioTag}>
                     <Text style={styles.smallAudioText}>有音频</Text>
@@ -156,6 +169,15 @@ export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devot
                 )}
               </TouchableOpacity>
             ))}
+          </View>
+        )}
+
+        {/* 周信息 */}
+        {weekInfo && (
+          <View style={styles.weekInfoContainer}>
+            <Text style={styles.weekInfoText}>
+              {weekInfo.year}年 第{weekInfo.week}周
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -166,134 +188,126 @@ export default function DevotionScreen({ navigation }: MainTabScreenProps<'Devot
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    padding: 16,
-    backgroundColor: '#fff',
+  scrollView: {
+    flex: 1,
+  },
+  // 今日灵修卡片
+  todayCard: {
+    margin: spacing.lg,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+  },
+  todayLabel: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: fontSize.sm,
+    marginBottom: spacing.xs,
+  },
+  todayDate: {
+    color: colors.textOnPrimary,
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+  },
+  todayScripture: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: fontSize.md,
+    marginTop: spacing.md,
+  },
+  audioIndicator: {
+    marginTop: spacing.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+    alignSelf: 'flex-start',
+  },
+  audioText: {
+    color: colors.textOnPrimary,
+    fontSize: fontSize.sm,
+  },
+  // 区块
+  section: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
+  },
+  // 祷告卡片
+  prayerCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+  },
+  prayerItem: {
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.divider,
+  },
+  prayerItemLast: {
+    borderBottomWidth: 0,
+  },
+  prayerContent: {
+    fontSize: fontSize.md,
+    color: colors.textPrimary,
+    lineHeight: 22,
+  },
+  prayerSubmitter: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    textAlign: 'right',
+  },
+  // 灵修卡片
+  devotionCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  weekText: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  scrollView: {
+  devotionContent: {
     flex: 1,
   },
-  todayCard: {
-    margin: 16,
-    backgroundColor: '#2563eb',
-    borderRadius: 16,
-    padding: 20,
-  },
-  todayLabel: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  todayDate: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  todayScripture: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 15,
-    marginTop: 12,
-  },
-  audioIndicator: {
-    marginTop: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-  },
-  audioText: {
-    color: '#fff',
-    fontSize: 13,
-  },
-  section: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 12,
-  },
-  prayerCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  prayerItem: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-  },
-  prayerContent: {
-    fontSize: 15,
-    color: '#374151',
-    lineHeight: 22,
-  },
-  prayerSubmitter: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginTop: 4,
-    textAlign: 'right',
-  },
-  devotionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
   devotionDate: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    color: colors.textPrimary,
   },
   devotionScripture: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginTop: 4,
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   smallAudioTag: {
-    marginTop: 8,
-    backgroundColor: '#dbeafe',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
+    backgroundColor: colors.tagBackground,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
   },
   smallAudioText: {
-    fontSize: 12,
-    color: '#1d4ed8',
+    fontSize: fontSize.xs,
+    color: colors.tagText,
+  },
+  // 周信息
+  weekInfoContainer: {
+    padding: spacing.lg,
+    alignItems: 'center',
+  },
+  weekInfoText: {
+    fontSize: fontSize.sm,
+    color: colors.textTertiary,
   },
 });

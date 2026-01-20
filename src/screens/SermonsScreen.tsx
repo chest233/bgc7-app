@@ -9,8 +9,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 import { getSermons } from '../services/api';
+import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
 import type { MainTabScreenProps } from '../navigation/types';
 import type { Sermon } from '../types';
 
@@ -64,38 +66,72 @@ export default function SermonsScreen({ navigation }: MainTabScreenProps<'Sermon
     fetchSermons(nextPage);
   };
 
-  const renderSermon = ({ item }: { item: Sermon }) => (
-    <TouchableOpacity
-      style={styles.sermonCard}
-      onPress={() => navigation.navigate('SermonDetail', { id: item.id })}
-    >
-      <View style={styles.sermonHeader}>
-        <Text style={styles.sermonTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        {item.special_occasion && (
-          <View style={styles.occasionTag}>
-            <Text style={styles.occasionText}>{item.special_occasion}</Text>
+  // 格式化日期为中文格式
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}年${month}月${day}日`;
+  };
+
+  // 获取标签
+  const getServiceTags = (sermon: Sermon) => {
+    const tags: string[] = [];
+    if (sermon.service_time === 'joint') {
+      tags.push('合堂');
+    }
+    if (sermon.special_occasion) {
+      tags.push(sermon.special_occasion);
+    }
+    if (sermon.communion_songs && sermon.communion_songs.length > 0) {
+      tags.push('圣餐');
+    }
+    return tags;
+  };
+
+  const renderSermon = ({ item }: { item: Sermon }) => {
+    const tags = getServiceTags(item);
+    return (
+      <TouchableOpacity
+        style={styles.sermonCard}
+        onPress={() => navigation.navigate('SermonDetail', { id: item.id })}
+        activeOpacity={0.7}
+      >
+        <View style={styles.sermonContent}>
+          <Text style={styles.sermonTitle} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.sermonMeta}>
+            {item.speaker} · {formatDate(item.date)}
+          </Text>
+          <View style={styles.sermonBottom}>
+            <Text style={styles.sermonScripture}>{item.scripture}</Text>
+            {tags.length > 0 && (
+              <View style={styles.tagsContainer}>
+                {tags.map((tag, index) => (
+                  <Text key={index} style={styles.tagText}>[{tag}]</Text>
+                ))}
+              </View>
+            )}
           </View>
-        )}
-      </View>
-      <Text style={styles.sermonMeta}>
-        {item.speaker} · {item.date}
-      </Text>
-      <Text style={styles.sermonScripture}>{item.scripture}</Text>
-      {item.audio_status === 'ready' && (
-        <View style={styles.audioTag}>
-          <Text style={styles.audioTagText}>有音频</Text>
         </View>
-      )}
-    </TouchableOpacity>
-  );
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={colors.textTertiary}
+        />
+      </TouchableOpacity>
+    );
+  };
 
   const renderFooter = () => {
     if (!loadingMore) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="small" color="#2563eb" />
+        <ActivityIndicator size="small" color={colors.primary} />
       </View>
     );
   };
@@ -104,7 +140,7 @@ export default function SermonsScreen({ navigation }: MainTabScreenProps<'Sermon
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
     );
@@ -121,7 +157,11 @@ export default function SermonsScreen({ navigation }: MainTabScreenProps<'Sermon
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
         }
         onEndReached={onLoadMore}
         onEndReachedThreshold={0.3}
@@ -139,7 +179,7 @@ export default function SermonsScreen({ navigation }: MainTabScreenProps<'Sermon
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -147,84 +187,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
   },
   listContent: {
-    padding: 16,
+    padding: spacing.lg,
   },
   sermonCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  sermonHeader: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sermonContent: {
+    flex: 1,
   },
   sermonTitle: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginRight: 8,
-  },
-  occasionTag: {
-    backgroundColor: '#fef3c7',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  occasionText: {
-    fontSize: 12,
-    color: '#92400e',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
   sermonMeta: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginTop: 8,
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+  },
+  sermonBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   sermonScripture: {
-    fontSize: 13,
-    color: '#2563eb',
-    marginTop: 4,
+    fontSize: fontSize.sm,
+    color: colors.scripture,
+    flex: 1,
   },
-  audioTag: {
-    marginTop: 8,
-    backgroundColor: '#dbeafe',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
+  tagsContainer: {
+    flexDirection: 'row',
+    gap: spacing.xs,
   },
-  audioTagText: {
-    fontSize: 12,
-    color: '#1d4ed8',
+  tagText: {
+    fontSize: fontSize.xs,
+    color: colors.tagText,
   },
   footer: {
-    padding: 16,
+    padding: spacing.lg,
     alignItems: 'center',
   },
   emptyContainer: {
-    padding: 32,
+    padding: spacing.xxl,
     alignItems: 'center',
   },
   emptyText: {
-    fontSize: 16,
-    color: '#6b7280',
+    fontSize: fontSize.md,
+    color: colors.textSecondary,
   },
 });

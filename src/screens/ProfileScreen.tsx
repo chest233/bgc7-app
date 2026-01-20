@@ -9,8 +9,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import type { MainTabScreenProps } from '../navigation/types';
+import { colors, spacing, borderRadius, fontSize, fontWeight } from '../constants/theme';
 import { APP_NAME, APP_VERSION } from '../constants/config';
+import type { MainTabScreenProps } from '../navigation/types';
 
 type MenuItemProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -21,24 +22,24 @@ type MenuItemProps = {
 
 function MenuItem({ icon, title, subtitle, onPress }: MenuItemProps) {
   return (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+    <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.menuIcon}>
-        <Ionicons name={icon} size={22} color="#2563eb" />
+        <Ionicons name={icon} size={22} color={colors.primary} />
       </View>
       <View style={styles.menuContent}>
         <Text style={styles.menuTitle}>{title}</Text>
         {subtitle && <Text style={styles.menuSubtitle}>{subtitle}</Text>}
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 }
 
-export default function MoreScreen({ navigation }: MainTabScreenProps<'More'>) {
+export default function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>更多</Text>
+        <Text style={styles.headerTitle}>我的</Text>
       </View>
       <ScrollView style={styles.scrollView}>
         {/* 功能区 */}
@@ -50,6 +51,12 @@ export default function MoreScreen({ navigation }: MainTabScreenProps<'More'>) {
               title="相册"
               subtitle="查看活动照片"
               onPress={() => navigation.navigate('Gallery')}
+            />
+            <MenuItem
+              icon="calendar-outline"
+              title="每日灵修"
+              subtitle="早灵修音频和祷告事项"
+              onPress={() => navigation.navigate('Devotion')}
             />
           </View>
         </View>
@@ -87,73 +94,73 @@ export default function MoreScreen({ navigation }: MainTabScreenProps<'More'>) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   header: {
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
   },
   scrollView: {
     flex: 1,
   },
   section: {
-    padding: 16,
+    padding: spacing.lg,
     paddingBottom: 0,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6b7280',
-    marginBottom: 8,
-    marginLeft: 4,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+    marginLeft: spacing.xs,
   },
   menuCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: colors.divider,
   },
   menuIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#eff6ff',
+    backgroundColor: colors.tagBackground,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuContent: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: spacing.md,
   },
   menuTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1f2937',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    color: colors.textPrimary,
   },
   menuSubtitle: {
-    fontSize: 13,
-    color: '#6b7280',
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   versionContainer: {
-    padding: 32,
+    padding: spacing.xxl,
     alignItems: 'center',
   },
   versionText: {
-    fontSize: 13,
-    color: '#9ca3af',
+    fontSize: fontSize.sm,
+    color: colors.textTertiary,
   },
 });

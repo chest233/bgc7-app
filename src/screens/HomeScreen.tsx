@@ -9,27 +9,28 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
-import { getBanners, getSermons, getTodayDevotion } from '../services/api';
-import { formatChineseDate, getWeekdayName } from '../utils';
+import { getSermons, getTodayDevotion } from '../services/api';
+import { colors, spacing, borderRadius, fontSize, fontWeight, shadows } from '../constants/theme';
 import type { MainTabScreenProps } from '../navigation/types';
-import type { Banner, Sermon, Devotion } from '../types';
+import type { Sermon, Devotion } from '../types';
+
+type ServiceTime = 'morning' | 'afternoon';
 
 export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
-  const [banners, setBanners] = useState<Banner[]>([]);
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [todayDevotion, setTodayDevotion] = useState<Devotion | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [serviceTime, setServiceTime] = useState<ServiceTime>('morning');
 
   const fetchData = async () => {
     try {
-      const [bannersData, sermonsData, devotionData] = await Promise.all([
-        getBanners().catch(() => []),
-        getSermons({ limit: 3 }).catch(() => ({ sermons: [] })),
+      const [sermonsData, devotionData] = await Promise.all([
+        getSermons({ limit: 20 }).catch(() => ({ sermons: [] })),
         getTodayDevotion().catch(() => null),
       ]);
-      setBanners(Array.isArray(bannersData) ? bannersData : []);
       setSermons(sermonsData?.sermons || []);
       setTodayDevotion(devotionData || null);
     } catch (error) {
@@ -49,11 +50,56 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
     fetchData();
   };
 
+  // 根据礼拜时间筛选
+  const filteredSermons = sermons.filter((sermon) => {
+    if (serviceTime === 'morning') {
+      return sermon.service_time === 'morning' || sermon.service_time === 'joint' || !sermon.service_time;
+    }
+    return sermon.service_time === 'afternoon';
+  });
+
+  // 获取日期信息
+  const getDateInfo = (dateStr: string) => {
+    if (!dateStr) return { day: '', month: '' };
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return { day: '', month: '' };
+    return {
+      day: date.getDate().toString(),
+      month: `${date.getMonth() + 1}月`,
+    };
+  };
+
+  // 获取星期几
+  const getWeekday = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    return weekdays[date.getDay()];
+  };
+
+  // 格式化日期
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return `${date.getMonth() + 1}月${date.getDate()}日`;
+  };
+
+  // 获取标签
+  const getTags = (sermon: Sermon) => {
+    const tags: string[] = [];
+    if (sermon.service_time === 'joint') tags.push('合堂');
+    if (sermon.special_occasion) tags.push(sermon.special_occasion);
+    if (sermon.communion_songs && sermon.communion_songs.length > 0) tags.push('圣餐');
+    return tags;
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
     );
@@ -61,104 +107,133 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* 顶部标题栏 */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>BGC7</Text>
+      </View>
+
       <ScrollView
         style={styles.scrollView}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
         }
       >
-        {/* Banner 区域 */}
-        {banners.length > 0 && (
-          <View style={styles.bannerContainer}>
-            <View style={styles.banner}>
-              <Text style={styles.bannerTitle}>
-                {banners[0].title || '欢迎来到 BGC7'}
-              </Text>
-              {banners[0].description && (
-                <Text style={styles.bannerDescription}>
-                  {banners[0].description}
-                </Text>
-              )}
-            </View>
-          </View>
-        )}
-
-        {/* 今日灵修 */}
+        {/* 今日灵修卡片 */}
         {todayDevotion && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>今日灵修</Text>
-            <TouchableOpacity
-              style={styles.devotionCard}
-              onPress={() =>
-                navigation.navigate('DevotionDetail', { id: todayDevotion.id })
-              }
-            >
-              <Text style={styles.devotionDate}>
-                {formatChineseDate(todayDevotion.date)}{' '}
-                {getWeekdayName(todayDevotion.date)}
-              </Text>
-              {todayDevotion.scripture && (
-                <Text style={styles.devotionScripture}>
-                  {todayDevotion.scripture}
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={styles.devotionCard}
+            onPress={() => navigation.navigate('DevotionDetail', { id: todayDevotion.id })}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.devotionLabel}>今日灵修</Text>
+            <Text style={styles.devotionDate}>
+              {getWeekday(todayDevotion.date)} · {formatDate(todayDevotion.date)}
+            </Text>
+            {todayDevotion.scripture && (
+              <Text style={styles.devotionScripture}>经文: {todayDevotion.scripture}</Text>
+            )}
+          </TouchableOpacity>
         )}
 
-        {/* 最新讲道 */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>最新讲道</Text>
+        {/* 如果没有今日灵修，显示入口卡片 */}
+        {!todayDevotion && (
+          <TouchableOpacity
+            style={styles.devotionCard}
+            onPress={() => navigation.navigate('Devotion')}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.devotionLabel}>每日早灵修</Text>
+            <Text style={styles.devotionDate}>周一至周五 6:20 - 7:00</Text>
+            <Text style={styles.devotionLink}>点击查看 →</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Tab 切换 */}
+        <View style={styles.tabWrapper}>
+          <View style={styles.tabContainer}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('Sermons')}
+              style={[styles.tab, serviceTime === 'morning' && styles.tabActive]}
+              onPress={() => setServiceTime('morning')}
+              activeOpacity={0.8}
             >
-              <Text style={styles.moreLink}>查看全部</Text>
+              <Text style={[styles.tabText, serviceTime === 'morning' && styles.tabTextActive]}>
+                上午堂
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, serviceTime === 'afternoon' && styles.tabActive]}
+              onPress={() => setServiceTime('afternoon')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.tabText, serviceTime === 'afternoon' && styles.tabTextActive]}>
+                下午堂
+              </Text>
             </TouchableOpacity>
           </View>
-          {sermons.map((sermon) => (
-            <TouchableOpacity
-              key={sermon.id}
-              style={styles.sermonCard}
-              onPress={() =>
-                navigation.navigate('SermonDetail', { id: sermon.id })
-              }
-            >
-              <Text style={styles.sermonTitle}>{sermon.title}</Text>
-              <Text style={styles.sermonMeta}>
-                {sermon.speaker} · {sermon.date}
-              </Text>
-              <Text style={styles.sermonScripture}>{sermon.scripture}</Text>
-            </TouchableOpacity>
-          ))}
         </View>
 
-        {/* 快捷入口 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>快捷入口</Text>
-          <View style={styles.quickLinks}>
-            <TouchableOpacity
-              style={styles.quickLinkItem}
-              onPress={() => navigation.navigate('Bible')}
-            >
-              <Text style={styles.quickLinkIcon}>📖</Text>
-              <Text style={styles.quickLinkText}>圣经阅读</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.quickLinkItem}
-              onPress={() => navigation.navigate('Gallery')}
-            >
-              <Text style={styles.quickLinkIcon}>📷</Text>
-              <Text style={styles.quickLinkText}>相册</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.quickLinkItem}
-              onPress={() => navigation.navigate('Devotion')}
-            >
-              <Text style={styles.quickLinkIcon}>🙏</Text>
-              <Text style={styles.quickLinkText}>祷告事项</Text>
-            </TouchableOpacity>
-          </View>
+        {/* 主日信息标题 */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>主日信息</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Sermons')}
+            style={styles.viewAllBtn}
+          >
+            <Text style={styles.viewAllText}>查看全部</Text>
+            <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* 讲道列表 */}
+        <View style={styles.sermonList}>
+          {filteredSermons.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>暂无讲道信息</Text>
+            </View>
+          ) : (
+            filteredSermons.slice(0, 10).map((sermon) => {
+              const dateInfo = getDateInfo(sermon.date);
+              const tags = getTags(sermon);
+              return (
+                <TouchableOpacity
+                  key={sermon.id}
+                  style={styles.sermonCard}
+                  onPress={() => navigation.navigate('SermonDetail', { id: sermon.id })}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.sermonContent}>
+                    <Text style={styles.sermonTitle} numberOfLines={2}>
+                      {sermon.title}
+                    </Text>
+                    <Text style={styles.sermonMeta}>
+                      {sermon.speaker}
+                    </Text>
+                    <View style={styles.sermonFooter}>
+                      <Text style={styles.sermonScripture} numberOfLines={1}>
+                        {sermon.scripture}
+                      </Text>
+                      {tags.length > 0 && (
+                        <View style={styles.tagsRow}>
+                          {tags.map((tag, i) => (
+                            <Text key={i} style={styles.tagText}>[{tag}]</Text>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                  {/* 日期盒子 */}
+                  <View style={styles.dateBox}>
+                    <Text style={styles.dateDay}>{dateInfo.day}</Text>
+                    <Text style={styles.dateMonth}>{dateInfo.month}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -168,121 +243,184 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  // 头部
+  header: {
+    height: 56,
+    backgroundColor: colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.primary,
+  },
   scrollView: {
     flex: 1,
   },
-  bannerContainer: {
-    padding: 16,
+  // 今日灵修卡片
+  devotionCard: {
+    margin: spacing.lg,
+    padding: spacing.xl,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.primary,
+    ...shadows.md,
   },
-  banner: {
-    backgroundColor: '#2563eb',
-    borderRadius: 12,
-    padding: 24,
+  devotionLabel: {
+    fontSize: fontSize.sm,
+    color: 'rgba(255,255,255,0.8)',
+    marginBottom: spacing.xs,
   },
-  bannerTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
+  devotionDate: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold,
+    color: colors.textOnPrimary,
+    marginBottom: spacing.sm,
   },
-  bannerDescription: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 14,
-    marginTop: 8,
+  devotionScripture: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.textOnPrimary,
+    lineHeight: 28,
   },
-  section: {
-    padding: 16,
-    paddingTop: 0,
+  devotionLink: {
+    fontSize: fontSize.sm,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: spacing.sm,
   },
+  // Tab 切换
+  tabWrapper: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.section,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xs,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  tabActive: {
+    backgroundColor: colors.surface,
+    ...shadows.sm,
+  },
+  tabText: {
+    fontSize: fontSize.md,
+    color: colors.textSecondary,
+    fontWeight: fontWeight.medium,
+  },
+  tabTextActive: {
+    color: colors.textPrimary,
+    fontWeight: fontWeight.semibold,
+  },
+  // 区块标题
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 12,
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.textPrimary,
   },
-  moreLink: {
-    color: '#2563eb',
-    fontSize: 14,
-  },
-  devotionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  devotionDate: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
-  },
-  devotionScripture: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginTop: 8,
-  },
-  sermonCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  sermonTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
-  },
-  sermonMeta: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginTop: 4,
-  },
-  sermonScripture: {
-    fontSize: 13,
-    color: '#2563eb',
-    marginTop: 4,
-  },
-  quickLinks: {
+  viewAllBtn: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  quickLinkItem: {
     alignItems: 'center',
   },
-  quickLinkIcon: {
-    fontSize: 28,
-    marginBottom: 4,
+  viewAllText: {
+    fontSize: fontSize.sm,
+    color: colors.primary,
   },
-  quickLinkText: {
-    fontSize: 13,
-    color: '#4b5563',
+  // 讲道列表
+  sermonList: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
+  sermonCard: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    ...shadows.sm,
+  },
+  sermonContent: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  sermonTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+    lineHeight: 24,
+  },
+  sermonMeta: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+  },
+  sermonFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sermonScripture: {
+    fontSize: fontSize.sm,
+    color: colors.primary,
+    flex: 1,
+  },
+  tagsRow: {
+    flexDirection: 'row',
+    marginLeft: spacing.sm,
+  },
+  tagText: {
+    fontSize: fontSize.xs,
+    color: colors.primary,
+    marginLeft: spacing.xs,
+  },
+  // 日期盒子
+  dateBox: {
+    width: 52,
+    height: 52,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dateDay: {
+    fontSize: 20,
+    fontWeight: fontWeight.bold,
+    color: colors.textOnPrimary,
+  },
+  dateMonth: {
+    fontSize: fontSize.xs,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  // 空状态
+  emptyContainer: {
+    padding: spacing.xxl,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: fontSize.md,
+    color: colors.textSecondary,
   },
 });
